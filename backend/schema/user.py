@@ -20,4 +20,5 @@ class userInDB(BaseModel):
     id: str
     name: str
     email: EmailStr
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    hashed_password: str
+    created_at: datetime = datetime.now(timezone.utc)
