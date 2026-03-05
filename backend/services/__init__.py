@@ -1,4 +1,4 @@
 from .llm import (
     useGemini,
-    useGroq
+    useGroq, useOpenai
 )
