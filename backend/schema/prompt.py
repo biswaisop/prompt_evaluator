@@ -13,12 +13,14 @@ class promptResponse(BaseModel):
     token_used: int
 
 class historyEntry(BaseModel):
+    id: str
     prompt: str
     model: str
+    response: str
     temp: float
     max_token: int
     token_used: int
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = datetime.now(timezone.utc)
 
 class historyResponse(BaseModel):
     entries: list[historyEntry]
