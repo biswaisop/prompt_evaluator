@@ -13,7 +13,7 @@ class promptResponse(BaseModel):
     token_used: int
 
 class historyEntry(BaseModel):
-    id: str
+    user_id: Optional[str] = Field(None, alias="_id")
     prompt: str
     model: str
     response: str
@@ -22,6 +22,11 @@ class historyEntry(BaseModel):
     token_used: int
     created_at: datetime = datetime.now(timezone.utc)
 
+    model_config = {"populate_by_name": True}
+
+
 class historyResponse(BaseModel):
     entries: list[historyEntry]
     total: int
+
+id

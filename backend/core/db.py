@@ -5,7 +5,12 @@ import os
 
 load_dotenv()
 
-client = MongoClient(os.getenv("MONGOURI"))
+client = MongoClient(
+    os.getenv("MONGOURI"),
+    maxPoolSize=100,        # max concurrent connections
+    minPoolSize=5,          # keep 5 alive even when idle
+    serverSelectionTimeoutMS=5000  # fail fast if DB is unreachable
+    )
 db = client[os.getenv("DBNAME", "Prompt_Playground")]
 
 users_collection: Collection = db["Users"]
