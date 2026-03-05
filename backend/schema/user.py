@@ -17,8 +17,10 @@ class tokenResponse(BaseModel):
     toekn_type: str = "bearer"
 
 class userInDB(BaseModel):
-    id: str
+    user_id: Optional[str] = Field(None, alias="_id")
     name: str
     email: EmailStr
     hashed_password: str
     created_at: datetime = datetime.now(timezone.utc)
+
+    model_config = {"populate_by_name": True}
