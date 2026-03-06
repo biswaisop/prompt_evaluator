@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-accent: #4F46E5;
   --color-accent-hover: #4338CA;
@@ -7,7 +9,7 @@
 }
 
 body {
-  background: #ffffff;
-  color: #000000;
+  background: #ffffff !important;
+  color: #000000 !important;
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }

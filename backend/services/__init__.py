@@ -1,4 +1,5 @@
 from .llm import (
-    useGemini,
-    useGroq, useOpenai
+    groq_response,
+    gemini_response,
+    openai_response
 )
