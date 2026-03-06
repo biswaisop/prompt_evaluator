@@ -3,20 +3,20 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 
 
-def groq_response(api_key:str, temperature: float, max_tokens: int, query:str) -> dict:
+def groq_response(api_key:str, temperature: float, max_tokens: int, query:str, model_name: str = "llama-3.3-70b-versatile") -> dict:
         llm = ChatGroq(
             api_key=api_key,
-            model_name="llama-3.3-70b-versatile",
+            model_name=model_name,
             temperature=temperature,
             max_tokens=max_tokens
         )
         return llm.invoke(query)
 
 
-def groq_stream(api_key: str, temperature: float, max_tokens: int, query: str):
+def groq_stream(api_key: str, temperature: float, max_tokens: int, query: str, model_name: str = "llama-3.3-70b-versatile"):
         llm = ChatGroq(
             api_key=api_key,
-            model_name="llama-3.3-70b-versatile",
+            model_name=model_name,
             temperature=temperature,
             max_tokens=max_tokens,
         )

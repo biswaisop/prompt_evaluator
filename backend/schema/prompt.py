@@ -5,6 +5,7 @@ from typing import Optional
 class promptRequest(BaseModel):
     api_key: str
     prompt: str
+    model: str = "llama-3.3-70b-versatile"
     temp: float = Field(default=0.7, ge=0.0, le=1.0)
     max_token: int = Field(default=512, ge=100, le=2000)
 

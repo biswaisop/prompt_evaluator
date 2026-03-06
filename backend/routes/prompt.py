@@ -15,7 +15,8 @@ def run_prompt(request: promptRequest, current_user: str = Depends(get_current_u
             api_key = request.api_key,
             max_tokens=request.max_token,
             temperature=request.temp,
-            query=request.prompt
+            query=request.prompt,
+            model_name=request.model
         )
     except Exception as e:
         raise HTTPException(
@@ -51,6 +52,7 @@ def run_prompt_stream(request: promptRequest, current_user: str = Depends(get_cu
                 max_tokens=request.max_token,
                 temperature=request.temp,
                 query=request.prompt,
+                model_name=request.model,
             ):
                 token = chunk.content or ""
                 full_output += token

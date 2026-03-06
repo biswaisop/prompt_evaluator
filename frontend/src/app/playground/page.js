@@ -136,7 +136,10 @@ export default function PlaygroundPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar
-        links={[{ href: "/history", label: "History" }]}
+        links={[
+          { href: "/compare", label: "Compare" },
+          { href: "/history", label: "History" },
+        ]}
         onLogout={logout}
       />
 

@@ -1,6 +1,6 @@
 # Prompt Evaluator
 
-A full-stack application for testing and evaluating LLM prompts. Users sign up, submit prompts to a Groq-hosted LLM (Llama 3.3 70B), and receive streamed responses token by token. Every prompt and response is saved to a history that can be browsed, reviewed, and deleted.
+A full-stack application for testing and evaluating LLM prompts. Users sign up, submit prompts to Groq-hosted open-source models, and receive streamed responses token by token. Every prompt and response is saved to a history that can be browsed, reviewed, and deleted. A Compare page lets you run the same prompt against multiple models side by side.
 
 ## Architecture
 
@@ -33,6 +33,7 @@ backend/           FastAPI + MongoDB (PyMongo) + LangChain
 | `app/signup/page.js` | Signup form |
 | `app/playground/page.js` | Main prompt interface with streaming output and history sidebar |
 | `app/history/page.js` | Full history browser with detail panel |
+| `app/compare/page.js` | Side-by-side model comparison with parallel streaming |
 | `components/Navbar.js` | Shared navigation bar |
 | `components/PromptForm.js` | Prompt input form (API key, prompt, temperature, max tokens) |
 | `components/ResultCard.js` | Streamed/static LLM response display |
@@ -50,7 +51,7 @@ All endpoints except auth require a Bearer token in the `Authorization` header.
 |--------|------|------|-------------|
 | POST | `/auth/signup` | No | Create account. Body: `{ name, email, password }` |
 | POST | `/auth/login` | No | Get JWT. Body: `{ email, password }` |
-| POST | `/api/prompt` | Yes | Run prompt (sync). Body: `{ api_key, prompt, temp, max_token }` |
+| POST | `/api/prompt` | Yes | Run prompt (sync). Body: `{ api_key, prompt, temp, max_token, model? }` |
 | POST | `/api/prompt/stream` | Yes | Run prompt (SSE stream). Same body as above |
 | GET | `/api/getEntries` | Yes | List all history entries for the current user |
 | GET | `/api/getHistory/{id}` | Yes | Get a single history entry |
@@ -68,6 +69,19 @@ data: {"done": true, "model": "llama-3.3-70b-versatile", "token_used": 42}
 ```
 
 On error mid-stream: `data: {"error": "message"}`.
+
+### Supported Models
+
+All models are accessed via a single Groq API key. Pass the model ID in the `model` field of the request body (defaults to `llama-3.3-70b-versatile` if omitted).
+
+| Model | ID |
+|-------|----|
+| Llama 3.3 70B | `llama-3.3-70b-versatile` |
+| Llama 3.1 8B | `llama-3.1-8b-instant` |
+| Llama 3 70B | `llama3-70b-8192` |
+| Llama 3 8B | `llama3-8b-8192` |
+| Mixtral 8x7B | `mixtral-8x7b-32768` |
+| Gemma 2 9B | `gemma2-9b-it` |
 
 ## Prerequisites
 
@@ -170,6 +184,7 @@ Open `http://localhost:3000` in your browser.
 3. Enter your Groq API key, write a prompt, adjust temperature and max tokens.
 4. Click "Run Prompt" -- the response streams in token by token.
 5. Every prompt/response pair is saved automatically. Browse them in the History page or the sidebar.
+6. Open the Compare page to select multiple models, submit the same prompt, and see results stream in side by side.
 
 ## Project Structure
 
@@ -193,14 +208,14 @@ prompt_evaluator/
       prompt.py              # promptRequest, promptResponse, historyEntry
   frontend/
     src/
-      app/                   # Next.js pages (landing, login, signup, playground, history)
+      app/                   # Next.js pages (landing, login, signup, playground, history, compare)
       components/            # Reusable UI components
       lib/                   # API helper, auth hook
 ```
 
 ## Tech Stack
 
-- **Backend**: FastAPI, PyMongo, LangChain, Groq (Llama 3.3 70B), python-jose (JWT), passlib (bcrypt)
+- **Backend**: FastAPI, PyMongo, LangChain, Groq (Llama 3.3 70B, Llama 3.1 8B, Mixtral 8x7B, Gemma 2 9B, and more), python-jose (JWT), passlib (bcrypt)
 - **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS 4
 - **Database**: MongoDB
 - **Auth**: JWT Bearer tokens, bcrypt password hashing

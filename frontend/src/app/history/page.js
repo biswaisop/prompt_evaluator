@@ -64,7 +64,10 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar
-        links={[{ href: "/playground", label: "Playground" }]}
+        links={[
+          { href: "/playground", label: "Playground" },
+          { href: "/compare", label: "Compare" },
+        ]}
         onLogout={logout}
       />
 
