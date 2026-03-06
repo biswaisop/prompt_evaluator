@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/useAuth";
 import Navbar from "@/components/Navbar";
 import Spinner from "@/components/Spinner";
@@ -11,7 +11,15 @@ const AVAILABLE_MODELS = [
   { id: "llama3-8b-8192", label: "Llama 3 8B" },
 ];
 
-function streamModel(apiUrl, token, payload, modelId, onToken, onDone, onError) {
+function streamModel(
+  apiUrl,
+  token,
+  payload,
+  modelId,
+  onToken,
+  onDone,
+  onError,
+) {
   const controller = new AbortController();
 
   (async () => {
@@ -88,12 +96,13 @@ export default function ComparePage() {
   const [results, setResults] = useState({});
   const [running, setRunning] = useState(false);
   const controllersRef = useRef([]);
+  const pendingRef = useRef(0);
 
   function toggleModel(modelId) {
     setSelectedModels((prev) =>
       prev.includes(modelId)
         ? prev.filter((m) => m !== modelId)
-        : [...prev, modelId]
+        : [...prev, modelId],
     );
   }
 
@@ -109,13 +118,23 @@ export default function ComparePage() {
       ...prev,
       [modelId]: { ...data, streaming: false, error: null },
     }));
+    pendingRef.current -= 1;
+    if (pendingRef.current === 0) setRunning(false);
   }, []);
 
   const handleError = useCallback((modelId, message) => {
     setResults((prev) => ({
       ...prev,
-      [modelId]: { output: "", model: modelId, token_used: 0, streaming: false, error: message },
+      [modelId]: {
+        output: "",
+        model: modelId,
+        token_used: 0,
+        streaming: false,
+        error: message,
+      },
     }));
+    pendingRef.current -= 1;
+    if (pendingRef.current === 0) setRunning(false);
   }, []);
 
   function handleSubmit(e) {
@@ -140,27 +159,31 @@ export default function ComparePage() {
     // Initialize results
     const init = {};
     for (const m of selectedModels) {
-      init[m] = { output: "", model: m, token_used: 0, streaming: true, error: null };
+      init[m] = {
+        output: "",
+        model: m,
+        token_used: 0,
+        streaming: true,
+        error: null,
+      };
     }
     setResults(init);
     setRunning(true);
+    pendingRef.current = selectedModels.length;
 
     const controllers = selectedModels.map((modelId) =>
-      streamModel(apiUrl, token, payload, modelId, handleToken, handleDone, handleError)
+      streamModel(
+        apiUrl,
+        token,
+        payload,
+        modelId,
+        handleToken,
+        handleDone,
+        handleError,
+      ),
     );
     controllersRef.current = controllers;
   }
-
-  // Check if all selected models are done
-  const allDone =
-    running &&
-    selectedModels.length > 0 &&
-    selectedModels.every((m) => results[m] && !results[m].streaming);
-
-  // Reset running once all streams finish
-  useEffect(() => {
-    if (allDone) setRunning(false);
-  }, [allDone]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -178,7 +201,10 @@ export default function ComparePage() {
         <form onSubmit={handleSubmit} className="space-y-5 mb-8">
           {/* API Key */}
           <div>
-            <label htmlFor="apiKey" className="block text-sm font-medium mb-1.5">
+            <label
+              htmlFor="apiKey"
+              className="block text-sm font-medium mb-1.5"
+            >
               API Key
             </label>
             <input
@@ -193,7 +219,10 @@ export default function ComparePage() {
 
           {/* Prompt */}
           <div>
-            <label htmlFor="prompt" className="block text-sm font-medium mb-1.5">
+            <label
+              htmlFor="prompt"
+              className="block text-sm font-medium mb-1.5"
+            >
               Prompt
             </label>
             <textarea
@@ -209,7 +238,10 @@ export default function ComparePage() {
           {/* Parameters */}
           <div className="grid grid-cols-2 gap-4 max-w-md">
             <div>
-              <label htmlFor="temp" className="block text-sm font-medium mb-1.5">
+              <label
+                htmlFor="temp"
+                className="block text-sm font-medium mb-1.5"
+              >
                 Temperature: {temp}
               </label>
               <input
@@ -224,7 +256,10 @@ export default function ComparePage() {
               />
             </div>
             <div>
-              <label htmlFor="maxToken" className="block text-sm font-medium mb-1.5">
+              <label
+                htmlFor="maxToken"
+                className="block text-sm font-medium mb-1.5"
+              >
                 Max Tokens
               </label>
               <input
@@ -278,11 +313,11 @@ export default function ComparePage() {
               !prompt.trim() ||
               !apiKey.trim() ||
               selectedModels.length === 0 ||
-              (running && !allDone)
+              running
             }
             className="text-sm font-medium text-white bg-[#4F46E5] hover:bg-[#4338CA] disabled:opacity-50 disabled:cursor-not-allowed px-6 py-2.5 rounded-md transition-colors"
           >
-            {running && !allDone ? "Comparing…" : "Compare"}
+            {running ? "Comparing…" : "Compare"}
           </button>
         </form>
 
@@ -298,7 +333,8 @@ export default function ComparePage() {
               const r = results[modelId];
               if (!r) return null;
               const label =
-                AVAILABLE_MODELS.find((m) => m.id === modelId)?.label || modelId;
+                AVAILABLE_MODELS.find((m) => m.id === modelId)?.label ||
+                modelId;
               return (
                 <div
                   key={modelId}
