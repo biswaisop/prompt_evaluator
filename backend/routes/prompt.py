@@ -8,6 +8,22 @@ import json
 
 PromptRouter = APIRouter()
 
+def _clean_error(e: Exception) -> str:
+    """Extract a short, user-friendly message from LLM SDK exceptions."""
+    msg = str(e)
+    # Groq/OpenAI SDK errors often embed a JSON body with a readable message
+    try:
+        start = msg.index("{'error")
+        import ast
+        body = ast.literal_eval(msg[start:])
+        return body["error"]["message"]
+    except Exception:
+        pass
+    # Strip the verbose 'Error code: NNN - ...' prefix if present
+    if " - " in msg:
+        return msg.split(" - ", 1)[1].strip()
+    return msg
+
 @PromptRouter.post("/prompt", response_model=promptResponse)
 def run_prompt(request: promptRequest, current_user: str = Depends(get_current_user)):
     try:
@@ -21,7 +37,7 @@ def run_prompt(request: promptRequest, current_user: str = Depends(get_current_u
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"LLM Service error {str(e)}"
+            detail=_clean_error(e)
         )
     output = result.content
     model = result.response_metadata.get("model_name", "unknown")
@@ -68,7 +84,7 @@ def run_prompt_stream(request: promptRequest, current_user: str = Depends(get_cu
                 yield f"data: {json.dumps({'token': token})}\n\n"
 
         except Exception as e:
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield f"data: {json.dumps({'error': _clean_error(e)})}\n\n"
             return
 
         # Save to history after streaming completes
