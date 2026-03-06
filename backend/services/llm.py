@@ -13,6 +13,17 @@ def groq_response(api_key:str, temperature: float, max_tokens: int, query:str) -
         return llm.invoke(query)
 
 
+def groq_stream(api_key: str, temperature: float, max_tokens: int, query: str):
+        llm = ChatGroq(
+            api_key=api_key,
+            model_name="llama-3.3-70b-versatile",
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        for chunk in llm.stream(query):
+            yield chunk
+
+
 
 def gemini_response( api_key:str, temperature: float, max_tokens: int,query: str) -> dict:
         llm = ChatGoogleGenerativeAI(

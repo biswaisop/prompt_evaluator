@@ -12,6 +12,7 @@ import HistorySidebar from "@/components/HistorySidebar";
 export default function PlaygroundPage() {
   const { logout } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
@@ -41,23 +42,75 @@ export default function PlaygroundPage() {
       setError("");
       setResult(null);
       setLoading(true);
+      setStreaming(true);
+
       try {
-        const res = await apiFetch("/api/prompt", {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/prompt/stream`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
         if (!res.ok) {
           const data = await res.json();
           setError(data.detail || "Something went wrong.");
+          setLoading(false);
+          setStreaming(false);
           return;
         }
-        const data = await res.json();
-        setResult(data);
-        fetchHistory();
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let output = "";
+        let model = "";
+        let tokenUsed = 0;
+
+        setLoading(false); // hide spinner once stream starts
+        setResult({ output: "", model: "", token_used: 0 });
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const text = decoder.decode(value, { stream: true });
+          const lines = text.split("\n");
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const json = JSON.parse(line.slice(6));
+
+            if (json.error) {
+              setError(json.error);
+              setStreaming(false);
+              return;
+            }
+
+            if (json.done) {
+              model = json.model || model;
+              tokenUsed = json.token_used ?? tokenUsed;
+              setResult({ output, model, token_used: tokenUsed });
+              setStreaming(false);
+              fetchHistory();
+              return;
+            }
+
+            output += json.token;
+            setResult((prev) => ({ ...prev, output }));
+          }
+        }
+
+        setStreaming(false);
       } catch {
         setError("Request failed. Please try again.");
-      } finally {
         setLoading(false);
+        setStreaming(false);
       }
     },
   });
@@ -99,7 +152,7 @@ export default function PlaygroundPage() {
             </div>
           )}
 
-          <ResultCard result={result} />
+          <ResultCard result={result} streaming={streaming} />
         </div>
 
         <HistorySidebar
