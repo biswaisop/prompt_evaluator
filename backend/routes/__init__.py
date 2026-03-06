@@ -5,3 +5,7 @@ from .auth import (
 from .prompt import (
     PromptRouter,
 )
+
+from .history import (
+    HistoryRouter
+)
