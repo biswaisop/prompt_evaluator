@@ -1,4 +1,4 @@
-from db import users_collection
+from core.db import users_collection
 from datetime import datetime, timezone
 from schema.user import userInDB
 from bson import ObjectId
@@ -14,16 +14,16 @@ def createuser(name: str, email: str, hashed_password: str) -> dict:
 
     return str(result.inserted_id)
 
-def getuserbyemail(email: str) -> dict:
+def getuserbyemail(email: str) -> userInDB | None:
     user_data = users_collection.find_one({"email": email})
     if user_data:
         user_data["_id"] = str(user_data["_id"])
         return userInDB(**user_data)
     return None
 
-def getuserbyid(id: str) -> dict:
+def getuserbyid(id: str) -> userInDB | None:
     user_data = users_collection.find_one({"_id": ObjectId(id)})
     if user_data:
-            user_data["_id"] = str(user_data["_id"])
-    return user_data
-
+        user_data["_id"] = str(user_data["_id"])
+        return userInDB(**user_data)
+    return None
