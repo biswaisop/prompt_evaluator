@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useAuth } from "@/lib/useAuth";
 import Navbar from "@/components/Navbar";
 import Spinner from "@/components/Spinner";
@@ -8,10 +8,7 @@ import Spinner from "@/components/Spinner";
 const AVAILABLE_MODELS = [
   { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
   { id: "llama-3.1-8b-instant", label: "Llama 3.1 8B" },
-  { id: "llama3-70b-8192", label: "Llama 3 70B" },
   { id: "llama3-8b-8192", label: "Llama 3 8B" },
-  { id: "mixtral-8x7b-32768", label: "Mixtral 8x7B" },
-  { id: "gemma2-9b-it", label: "Gemma 2 9B" },
 ];
 
 function streamModel(apiUrl, token, payload, modelId, onToken, onDone, onError) {
@@ -159,6 +156,11 @@ export default function ComparePage() {
     running &&
     selectedModels.length > 0 &&
     selectedModels.every((m) => results[m] && !results[m].streaming);
+
+  // Reset running once all streams finish
+  useEffect(() => {
+    if (allDone) setRunning(false);
+  }, [allDone]);
 
   return (
     <div className="min-h-screen flex flex-col">

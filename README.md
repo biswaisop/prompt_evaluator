@@ -78,10 +78,7 @@ All models are accessed via a single Groq API key. Pass the model ID in the `mod
 |-------|----|
 | Llama 3.3 70B | `llama-3.3-70b-versatile` |
 | Llama 3.1 8B | `llama-3.1-8b-instant` |
-| Llama 3 70B | `llama3-70b-8192` |
 | Llama 3 8B | `llama3-8b-8192` |
-| Mixtral 8x7B | `mixtral-8x7b-32768` |
-| Gemma 2 9B | `gemma2-9b-it` |
 
 ## Prerequisites
 
