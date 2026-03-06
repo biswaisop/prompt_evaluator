@@ -14,7 +14,8 @@ class promptResponse(BaseModel):
     token_used: int
 
 class historyEntry(BaseModel):
-    user_id: Optional[str] = Field(None, alias="_id")
+    id: Optional[str] = Field(None, alias="_id")
+    user_id: str
     prompt: str
     model: str
     response: str
@@ -30,4 +31,3 @@ class historyResponse(BaseModel):
     entries: list[historyEntry]
     total: int
 
-id

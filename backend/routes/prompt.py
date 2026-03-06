@@ -21,7 +21,7 @@ def run_prompt(request: promptRequest, current_user: str = Depends(get_current_u
             detail=f"LLM Service error {str(e)}"
         )
     output = result.content
-    model = result.metadata.get("model_name", "unknown")
+    model = result.response_metadata.get("model_name", "unknown")
     token_used = result.response_metadata.get("token_usage", {}).get("total_tokens", 0)
     
     savePrompt(

@@ -14,14 +14,12 @@ def savePrompt(user_id: str, prompt: str, response: str,
         temp=temperature,
         max_token=max_tokens,
         token_used=tokens_used,
-        created_at=datetime.now(timezone.utc)
     )
     result = history_collection.insert_one(history.model_dump(by_alias=True, exclude_none=True))
     return str(result.inserted_id)
 
-
 def get_history_by_user(user_id: str) -> list[dict]:
-    cursor = history_collection.find({"_id": user_id}).sort("created_at", -1)
+    cursor = history_collection.find({"user_id": user_id}).sort("created_at", -1)
     results = []
     for doc in cursor:
         doc["_id"] = str(doc["_id"])
