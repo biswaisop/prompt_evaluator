@@ -40,5 +40,5 @@ def login(user: loginRequest):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
-    access_token = create_access_token(user.user_id)
+    access_token = create_access_token(existing_user.user_id)
     return tokenResponse(access_token=access_token, token_type="bearer")
