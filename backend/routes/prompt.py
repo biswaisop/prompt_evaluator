@@ -6,4 +6,7 @@ from services import useGroq
 
 router = APIRouter()
 
-# @router.pos
+# @router.post("/prompt", response_model=promptResponse)
+# def run_prompt(request: promptRequest, current_user: str = Depends(get_current_user)):
+#     try:
+        
