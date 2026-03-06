@@ -14,13 +14,13 @@ class loginRequest(BaseModel):
 
 class tokenResponse(BaseModel):
     access_token: str
-    toekn_type: str = "bearer"
+    token_type: str = "bearer"
 
 class userInDB(BaseModel):
     user_id: Optional[str] = Field(None, alias="_id")
     name: str
     email: EmailStr
     hashed_password: str
-    created_at: datetime = datetime.now(timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {"populate_by_name": True}

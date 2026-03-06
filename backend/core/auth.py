@@ -3,7 +3,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
-from userUtils import getuserbyemail
+from core.userUtils import getuserbyemail
 import os
 
 SECRET_KEY = os.getenv("SECRET_KEY")
